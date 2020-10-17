@@ -1,47 +1,55 @@
 import React from "react";
+import axios from "axios";
+import Movie from "./Movie";
+import "./App.css";
 
-const foodILike = [
-  {
-    name: "Kimchi",
-    image:
-      "https://www.maangchi.com/wp-content/uploads/2017/03/kimchi-insta.jpg",
-  },
-  {
-    name: "Samgyeopsal",
-    image:
-      "https://www.gildedgingerbread.com/wp-content/uploads/2017/08/Samgyeopsal-1.jpg",
-  },
-  {
-    name: "Bibimbap",
-    image:
-      "http://foodrecipesearch.com/wp-content/uploads/2017/09/04-30-minute-korean-bibimbap.jpg",
-  },
-  {
-    name: "Donkatsu",
-    image:
-      "https://s3-media4.fl.yelpcdn.com/bphoto/anesu6IAyAj2d6r19eFqEg/o.jpg",
-  },
-  {
-    name: "Kimbap",
-    image: "https://swisshansik.files.wordpress.com/2011/09/kimbap-2.jpg",
-  },
-];
+class App extends React.Component {
+  state = {
+    isLoading: true,
+    movies: [],
+  };
 
-function Food({ name, pic }) {
-  return (
-    <div>
-      <h1>like {name}</h1>
-      <img src={pic}></img>
-    </div>
-  );
-}
+  getMovies = async () => {
+    const {
+      data: {
+        data: { movies },
+      },
+    } = await axios.get(
+      "https://yts-proxy.now.sh/list_movies.json?sort_by=rating"
+    );
+    this.setState({ movies, isLoading: false });
+  };
 
-function renderFood(dish) {
-  return <Food name={dish.name} pic={dish.image} />;
-}
+  componentDidMount() {
+    this.getMovies();
+  }
 
-function App() {
-  return <div>{foodILike.map(renderFood)}</div>;
+  render() {
+    const { isLoading, movies } = this.state;
+    return (
+      <section className="container">
+        {isLoading ? (
+          <div className="loader">
+            <span className="loader__text">Loading...</span>
+          </div>
+        ) : (
+          <div className="moives">
+            {movies.map((movie) => (
+              <Movie
+                key={movie.id}
+                id={movie.id}
+                year={movie.year}
+                title={movie.title}
+                summary={movie.summary}
+                poster={movie.medium_cover_image}
+                genres={movie.genres}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+    );
+  }
 }
 
 export default App;
